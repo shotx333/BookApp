@@ -13,9 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
-using Microsoft.Owin;
-
-[assembly: OwinStartup(typeof(Startup))]
 
 namespace BookManagement.API;
 
