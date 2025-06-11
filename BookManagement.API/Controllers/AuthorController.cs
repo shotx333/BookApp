@@ -17,21 +17,21 @@ public class AuthorController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        var authors = _authorRepository.GetAuthors();
+        var authors = await _authorRepository.GetAuthorsAsync();
         return Ok(authors);
     }
 
     [HttpGet("{id}")]
-    public IActionResult Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var author = _authorRepository.GetAuthor(id);
+        var author = await _authorRepository.GetAuthorAsync(id);
         return Ok(author);
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] AuthorDto authorDto)
+    public async Task<IActionResult> Post([FromBody] AuthorDto authorDto)
     {
         var author = new Author
         {
@@ -43,14 +43,14 @@ public class AuthorController : ControllerBase
                 Genre = b.Genre,
             }).ToList()
         };
-                
-        _authorRepository.AddAuthor(author);
+
+        await _authorRepository.AddAuthorAsync(author);
         return CreatedAtAction(nameof(Get),  author);
     }
 
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] AuthorDto authorDto)
+    public async Task<IActionResult> Put(int id, [FromBody] AuthorDto authorDto)
     {
         var author = new Author
         {
@@ -63,14 +63,14 @@ public class AuthorController : ControllerBase
         {
             return BadRequest();
         }
-        _authorRepository.UpdateAuthor(id, author);
+        await _authorRepository.UpdateAuthorAsync(id, author);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _authorRepository.DeleteAuthor(id);
+        await _authorRepository.DeleteAuthorAsync(id);
         return NoContent();
     }
 }

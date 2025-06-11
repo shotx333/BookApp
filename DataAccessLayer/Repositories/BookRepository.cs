@@ -13,37 +13,38 @@ public class BookRepository : IBookRepository
         _context = context;
     }
 
-    public IEnumerable<Book> GetAll()
+    public async Task<IEnumerable<Book>> GetAllAsync()
     {
-        return _context.Books.Include(u => u.Author);
+        return await _context.Books.Include(u => u.Author).ToListAsync();
     }
 
-    public Book GetById(int id)
+    public async Task<Book> GetByIdAsync(int id)
     {
-        return _context.Books.Include(u => u.Author).FirstOrDefault(u => u.Id == id) ?? throw new InvalidOperationException();
+        return await _context.Books.Include(u => u.Author)
+            .FirstOrDefaultAsync(u => u.Id == id) ?? throw new InvalidOperationException();
     }
 
-    public void Insert(Book book)
+    public async Task InsertAsync(Book book)
     {
-        _context.Books.Add(book);
-        _context.SaveChanges();
+        await _context.Books.AddAsync(book);
+        await _context.SaveChangesAsync();
     }
 
-    public void Update(int id, Book book)
+    public async Task UpdateAsync(int id, Book book)
     {
-        var existingBook = _context.Books.Find(id) ??
+        var existingBook = await _context.Books.FindAsync(id) ??
                            throw new ArgumentException("Book with the provided id could not be found", nameof(id));
 
 
         _context.Entry(existingBook).CurrentValues.SetValues(book);
 
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void Delete(int id)
+    public async Task DeleteAsync(int id)
     {
-        var book = GetById(id);
+        var book = await GetByIdAsync(id);
         _context.Books.Remove(book);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

@@ -12,30 +12,30 @@ public class Book : IBookService
         _bookRepository = bookRepository;
     }
 
-    public IEnumerable<DataAccessLayer.Models.DatabaseModels.Book> GetAllBooks()
+    public async Task<IEnumerable<DataAccessLayer.Models.DatabaseModels.Book>> GetAllBooksAsync()
     {
-        return _bookRepository.GetAll();
+        return await _bookRepository.GetAllAsync();
     }
 
-    public DataAccessLayer.Models.DatabaseModels.Book GetBookById(int id)
+    public async Task<DataAccessLayer.Models.DatabaseModels.Book> GetBookByIdAsync(int id)
     {
-        return _bookRepository.GetById(id);
+        return await _bookRepository.GetByIdAsync(id);
     }
 
-    public DataAccessLayer.Models.DatabaseModels.Book AddBook(DataAccessLayer.Models.DatabaseModels.Book book)
+    public async Task<DataAccessLayer.Models.DatabaseModels.Book> AddBookAsync(DataAccessLayer.Models.DatabaseModels.Book book)
     {
-        _bookRepository.Insert(book);
+        await _bookRepository.InsertAsync(book);
         return book;
     }
 
-    public void UpdateBook(int id, DataAccessLayer.Models.DatabaseModels.Book book)
+    public async Task UpdateBookAsync(int id, DataAccessLayer.Models.DatabaseModels.Book book)
     {
-        _bookRepository.Update(id, book);
+        await _bookRepository.UpdateAsync(id, book);
     }
 
-    public void DeleteBook(int id)
+    public async Task DeleteBookAsync(int id)
     {
-        _bookRepository.Delete(id);
+        await _bookRepository.DeleteAsync(id);
     }
 
 

@@ -4,9 +4,9 @@ namespace DataAccessLayer.Repositories.Interfaces;
 
 public interface IAuthorRepository
 {
-    IQueryable<Author> GetAuthors();
-    Author GetAuthor(int id);
-    void AddAuthor(Author author);
-    void UpdateAuthor(int id, Author author);
-    void DeleteAuthor(int id);
+    Task<IEnumerable<Author>> GetAuthorsAsync();
+    Task<Author> GetAuthorAsync(int id);
+    Task AddAuthorAsync(Author author);
+    Task UpdateAuthorAsync(int id, Author author);
+    Task DeleteAuthorAsync(int id);
 }

@@ -4,9 +4,9 @@ namespace BusinessLogicLayer.Services.Interfaces;
 
 public interface IAuthorService
 {
-    IQueryable<DataAccessLayer.Models.DatabaseModels.Author> GetAuthors();
-    DataAccessLayer.Models.DatabaseModels.Author GetAuthorByBookId(int bookId);
-    void AddAuthor(DataAccessLayer.Models.DatabaseModels.Author author);
-    void UpdateAuthor(int id, DataAccessLayer.Models.DatabaseModels.Author author);
-    void DeleteAuthor(int id);
+    Task<IEnumerable<DataAccessLayer.Models.DatabaseModels.Author>> GetAuthorsAsync();
+    Task<DataAccessLayer.Models.DatabaseModels.Author> GetAuthorByBookIdAsync(int bookId);
+    Task AddAuthorAsync(DataAccessLayer.Models.DatabaseModels.Author author);
+    Task UpdateAuthorAsync(int id, DataAccessLayer.Models.DatabaseModels.Author author);
+    Task DeleteAuthorAsync(int id);
 }
