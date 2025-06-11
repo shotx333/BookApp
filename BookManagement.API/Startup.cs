@@ -36,8 +36,12 @@ public class Startup
 
 
 
+        var connectionString = Configuration.GetConnectionString("DefaultConnection");
+        if (string.IsNullOrWhiteSpace(connectionString))
+            connectionString = Environment.GetEnvironmentVariable("DEFAULT_CONNECTION");
+
         services.AddDbContext<LibraryDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(connectionString));
 
         services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<LibraryDbContext>().AddDefaultTokenProviders();
@@ -94,7 +98,10 @@ public class Startup
 
                     ValidIssuer = Configuration["Jwt:Issuer"],
                     ValidAudience = Configuration["Jwt:Issuer"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Jwt:Key"] ?? string.Empty))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                        string.IsNullOrWhiteSpace(Configuration["Jwt:Key"])
+                            ? Environment.GetEnvironmentVariable("JWT_KEY") ?? string.Empty
+                            : Configuration["Jwt:Key"]))
                 };
             });
     }
