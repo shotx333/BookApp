@@ -1,5 +1,6 @@
 ﻿using DataAccessLayer.Models.DatabaseModels;
 using DataAccessLayer.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DataAccessLayer.Repositories;
 
@@ -12,37 +13,37 @@ public class AuthorRepository : IAuthorRepository
         _context = context;
     }
 
-    public IQueryable<Author> GetAuthors()
+    public async Task<IEnumerable<Author>> GetAuthorsAsync()
     {
-        return _context.Authors;
+        return await _context.Authors.ToListAsync();
     }
 
-    public Author GetAuthor(int id)
+    public async Task<Author> GetAuthorAsync(int id)
     {
-        return _context.Authors.FirstOrDefault(x => x.Id == id) ?? throw new InvalidOperationException();
+        return await _context.Authors.FirstOrDefaultAsync(x => x.Id == id) ?? throw new InvalidOperationException();
     }
 
-    public void AddAuthor(Author author)
+    public async Task AddAuthorAsync(Author author)
     {
-        _context.Authors.Add(author);
-        _context.SaveChanges();
+        await _context.Authors.AddAsync(author);
+        await _context.SaveChangesAsync();
     }
 
-    public void UpdateAuthor(int id, Author author)
+    public async Task UpdateAuthorAsync(int id, Author author)
     {
-        var existingAuthor = _context.Authors.Find(id);
+        var existingAuthor = await _context.Authors.FindAsync(id);
         if (existingAuthor == null) return;
 
         _context.Entry(existingAuthor).CurrentValues.SetValues(author);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 
-    public void DeleteAuthor(int id)
+    public async Task DeleteAuthorAsync(int id)
     {
-        var authorToDelete = _context.Authors.Find(id);
+        var authorToDelete = await _context.Authors.FindAsync(id);
         if (authorToDelete == null) return;
 
         _context.Authors.Remove(authorToDelete);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
     }
 }

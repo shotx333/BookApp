@@ -4,9 +4,9 @@ namespace DataAccessLayer.Repositories.Interfaces;
 
 public interface IBookRepository
 {
-    IEnumerable<Book> GetAll();
-    Book GetById(int id);
-    void Insert(Book book);
-    void Update(int id, Book book);
-    void Delete(int id);
+    Task<IEnumerable<Book>> GetAllAsync();
+    Task<Book> GetByIdAsync(int id);
+    Task InsertAsync(Book book);
+    Task UpdateAsync(int id, Book book);
+    Task DeleteAsync(int id);
 }

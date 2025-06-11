@@ -17,23 +17,23 @@ public class BookController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        var books = _bookRepository.GetAll();
+        var books = await _bookRepository.GetAllAsync();
         return Ok(books);
     }
 
 
     [HttpGet("{id}")]
-    public IActionResult Get(int id)
+    public async Task<IActionResult> Get(int id)
     {
-        var book = _bookRepository.GetById(id);
+        var book = await _bookRepository.GetByIdAsync(id);
         return Ok(book);
     }
 
 
     [HttpPost]
-    public IActionResult Post([FromBody] BookDto bookDto)
+    public async Task<IActionResult> Post([FromBody] BookDto bookDto)
     {
 
         var book = new Book
@@ -42,15 +42,15 @@ public class BookController : ControllerBase
             Genre = bookDto.Genre,
             AuthorId = bookDto.AuthorId
         };
-        _bookRepository.Insert(book);
+        await _bookRepository.InsertAsync(book);
         return CreatedAtAction(nameof(Get),  book);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] BookDto bookDto)
+    public async Task<IActionResult> Put(int id, [FromBody] BookDto bookDto)
     {
-       var book= _bookRepository.GetById(id);
-    
+       var book= await _bookRepository.GetByIdAsync(id);
+
        book.Title = bookDto.Title;
        book.Genre = bookDto.Genre;
 
@@ -58,15 +58,15 @@ public class BookController : ControllerBase
         {
             return BadRequest();
         }
-        _bookRepository.Update(id, book);
+        await _bookRepository.UpdateAsync(id, book);
         return NoContent();
     }
 
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        _bookRepository.Delete(id);
+        await _bookRepository.DeleteAsync(id);
         return NoContent();
     }
 }

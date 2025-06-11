@@ -12,28 +12,28 @@ public class Author : IAuthorService
         _authorRepository = authorRepository;
     }
 
-    public IQueryable<DataAccessLayer.Models.DatabaseModels.Author> GetAuthors()
+    public async Task<IEnumerable<DataAccessLayer.Models.DatabaseModels.Author>> GetAuthorsAsync()
     {
-        return _authorRepository.GetAuthors();
+        return await _authorRepository.GetAuthorsAsync();
     }
 
-    public DataAccessLayer.Models.DatabaseModels.Author GetAuthorByBookId(int id)
+    public async Task<DataAccessLayer.Models.DatabaseModels.Author> GetAuthorByBookIdAsync(int id)
     {
-        return _authorRepository.GetAuthor(id);
+        return await _authorRepository.GetAuthorAsync(id);
     }
 
-    public void AddAuthor(DataAccessLayer.Models.DatabaseModels.Author author)
+    public async Task AddAuthorAsync(DataAccessLayer.Models.DatabaseModels.Author author)
     {
-        _authorRepository.AddAuthor(author);
+        await _authorRepository.AddAuthorAsync(author);
     }
 
-    public void UpdateAuthor(int id, DataAccessLayer.Models.DatabaseModels.Author author)
+    public async Task UpdateAuthorAsync(int id, DataAccessLayer.Models.DatabaseModels.Author author)
     {
-        _authorRepository.UpdateAuthor(id, author);
+        await _authorRepository.UpdateAuthorAsync(id, author);
     }
 
-    public void DeleteAuthor(int id)
+    public async Task DeleteAuthorAsync(int id)
     {
-        _authorRepository.DeleteAuthor(id);
+        await _authorRepository.DeleteAuthorAsync(id);
     }
 }
