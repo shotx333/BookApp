@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using System.Text.Json.Serialization;
 using BookManagement.API;
 using BusinessLogicLayer.Services;
@@ -31,10 +31,8 @@ public class Startup
 
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IAuthorRepository, AuthorRepository>();
-        services.AddScoped<IBookService, Book>();
-        services.AddScoped<IAuthorService, Author>();
-
-
+        services.AddScoped<IBookService, BookService>();
+        services.AddScoped<IAuthorService, AuthorService>();
 
         var connectionString = Configuration.GetConnectionString("DefaultConnection");
         if (string.IsNullOrWhiteSpace(connectionString))
@@ -45,7 +43,6 @@ public class Startup
 
         services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<LibraryDbContext>().AddDefaultTokenProviders();
-
 
         services.AddSwaggerGen(c =>
         {
@@ -106,7 +103,6 @@ public class Startup
             });
     }
 
-
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
     {
         if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
@@ -120,7 +116,6 @@ public class Startup
 
         app.UseAuthentication();
         app.UseAuthorization();
-
 
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         using (var serviceScope = app.ApplicationServices.GetService<IServiceScopeFactory>()?.CreateScope())

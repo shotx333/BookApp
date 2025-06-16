@@ -1,6 +1,7 @@
-﻿using DataAccessLayer.Models.DatabaseModels;
+using BusinessLogicLayer.Exceptions;
+using BusinessLogicLayer.Models;
+using BusinessLogicLayer.Services.Interfaces;
 using DataAccessLayer.Models.DTO;
-using DataAccessLayer.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookManagement.API.Controllers;
@@ -9,64 +10,169 @@ namespace BookManagement.API.Controllers;
 [ApiController]
 public class BookController : ControllerBase
 {
-    private readonly IBookRepository _bookRepository;
+    private readonly IBookService _bookService;
 
-    public BookController(IBookRepository bookRepository)
+    public BookController(IBookService bookService)
     {
-        _bookRepository = bookRepository;
+        _bookService = bookService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetAllBooks()
     {
-        var books = await _bookRepository.GetAllAsync();
-        return Ok(books);
+        try
+        {
+            var books = await _bookService.GetAllBooksAsync();
+            return Ok(books);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
-
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetBook(int id)
     {
-        var book = await _bookRepository.GetByIdAsync(id);
-        return Ok(book);
+        try
+        {
+            var book = await _bookService.GetBookByIdAsync(id);
+            return Ok(book);
+        }
+        catch (BookNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
+    [HttpGet("author/{authorId}")]
+    public async Task<IActionResult> GetBooksByAuthor(int authorId)
+    {
+        try
+        {
+            var books = await _bookService.GetBooksByAuthorAsync(authorId);
+            return Ok(books);
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchBooks([FromQuery] string? title, [FromQuery] string? genre, [FromQuery] int? authorId)
+    {
+        try
+        {
+            var criteria = new BookSearchCriteria
+            {
+                Title = title,
+                Genre = genre,
+                AuthorId = authorId
+            };
+
+            var books = await _bookService.SearchBooksAsync(criteria);
+            return Ok(books);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("statistics")]
+    public async Task<IActionResult> GetBookStatistics()
+    {
+        try
+        {
+            var statistics = await _bookService.GetBookStatisticsAsync();
+            return Ok(statistics);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] BookDto bookDto)
+    public async Task<IActionResult> CreateBook([FromBody] BookDto bookDto)
     {
-
-        var book = new Book
+        try
         {
-            Title = bookDto.Title,
-            Genre = bookDto.Genre,
-            AuthorId = bookDto.AuthorId
-        };
-        await _bookRepository.InsertAsync(book);
-        return CreatedAtAction(nameof(Get),  book);
+            var book = await _bookService.CreateBookAsync(bookDto.Title, bookDto.Genre, bookDto.AuthorId);
+            return CreatedAtAction(nameof(GetBook), new { id = book.Id }, book);
+        }
+        catch (InvalidBookDataException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (DuplicateBookException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] BookDto bookDto)
+    public async Task<IActionResult> UpdateBook(int id, [FromBody] BookDto bookDto)
     {
-       var book= await _bookRepository.GetByIdAsync(id);
-
-       book.Title = bookDto.Title;
-       book.Genre = bookDto.Genre;
-
-        if (id != book.Id)
+        try
         {
-            return BadRequest();
+            var book = await _bookService.UpdateBookAsync(id, bookDto.Title, bookDto.Genre, bookDto.AuthorId);
+            return Ok(book);
         }
-        await _bookRepository.UpdateAsync(id, book);
-        return NoContent();
+        catch (BookNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidBookDataException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (DuplicateBookException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
-
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteBook(int id)
     {
-        await _bookRepository.DeleteAsync(id);
-        return NoContent();
+        try
+        {
+            await _bookService.DeleteBookAsync(id);
+            return NoContent();
+        }
+        catch (BookNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

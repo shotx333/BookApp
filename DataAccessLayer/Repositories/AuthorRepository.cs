@@ -1,4 +1,4 @@
-﻿using DataAccessLayer.Models.DatabaseModels;
+using DataAccessLayer.Models.DatabaseModels;
 using DataAccessLayer.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,6 +21,31 @@ public class AuthorRepository : IAuthorRepository
     public async Task<Author> GetAuthorAsync(int id)
     {
         return await _context.Authors.FirstOrDefaultAsync(x => x.Id == id) ?? throw new InvalidOperationException();
+    }
+
+    public async Task<Author?> FindAuthorAsync(int id)
+    {
+        return await _context.Authors.Include(a => a.Books).FirstOrDefaultAsync(x => x.Id == id);
+    }
+
+    public async Task<IEnumerable<Author>> GetAuthorsWithBookCountAsync()
+    {
+        return await _context.Authors.Include(a => a.Books).ToListAsync();
+    }
+
+    public async Task<bool> AuthorExistsAsync(int id)
+    {
+        return await _context.Authors.AnyAsync(a => a.Id == id);
+    }
+
+    public async Task<bool> AuthorHasBooksAsync(int id)
+    {
+        return await _context.Books.AnyAsync(b => b.AuthorId == id);
+    }
+
+    public async Task<int> GetAuthorBookCountAsync(int id)
+    {
+        return await _context.Books.CountAsync(b => b.AuthorId == id);
     }
 
     public async Task AddAuthorAsync(Author author)

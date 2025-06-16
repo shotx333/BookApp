@@ -1,6 +1,6 @@
-﻿using DataAccessLayer.Models.DatabaseModels;
+using BusinessLogicLayer.Exceptions;
+using BusinessLogicLayer.Services.Interfaces;
 using DataAccessLayer.Models.DTO;
-using DataAccessLayer.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BookManagement.API.Controllers;
@@ -9,68 +9,154 @@ namespace BookManagement.API.Controllers;
 [ApiController]
 public class AuthorController : ControllerBase
 {
-    private readonly IAuthorRepository _authorRepository;
+    private readonly IAuthorService _authorService;
 
-    public AuthorController(IAuthorRepository authorRepository)
+    public AuthorController(IAuthorService authorService)
     {
-        _authorRepository = authorRepository;
+        _authorService = authorService;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> GetAllAuthors()
     {
-        var authors = await _authorRepository.GetAuthorsAsync();
-        return Ok(authors);
+        try
+        {
+            var authors = await _authorService.GetAllAuthorsAsync();
+            return Ok(authors);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetAuthor(int id)
     {
-        var author = await _authorRepository.GetAuthorAsync(id);
-        return Ok(author);
+        try
+        {
+            var author = await _authorService.GetAuthorByIdAsync(id);
+            return Ok(author);
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("{id}/with-books")]
+    public async Task<IActionResult> GetAuthorWithBooks(int id)
+    {
+        try
+        {
+            var author = await _authorService.GetAuthorWithBooksAsync(id);
+            return Ok(author);
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("with-books")]
+    public async Task<IActionResult> GetAuthorsWithBooks()
+    {
+        try
+        {
+            var authors = await _authorService.GetAuthorsWithBooksAsync();
+            return Ok(authors);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
+    }
+
+    [HttpGet("{id}/book-count")]
+    public async Task<IActionResult> GetAuthorBookCount(int id)
+    {
+        try
+        {
+            var bookCount = await _authorService.GetAuthorBookCountAsync(id);
+            return Ok(new { AuthorId = id, BookCount = bookCount });
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] AuthorDto authorDto)
+    public async Task<IActionResult> CreateAuthor([FromBody] AuthorDto authorDto)
     {
-        var author = new Author
+        try
         {
-            FirstName = authorDto.FirstName,
-            LastName = authorDto.LastName,
-            Books = authorDto.Books.Select(b => new Book
-            {
-                Title = b.Title,
-                Genre = b.Genre,
-            }).ToList()
-        };
-
-        await _authorRepository.AddAuthorAsync(author);
-        return CreatedAtAction(nameof(Get),  author);
+            var author = await _authorService.CreateAuthorAsync(authorDto.FirstName, authorDto.LastName);
+            return CreatedAtAction(nameof(GetAuthor), new { id = author.Id }, author);
+        }
+        catch (InvalidBookDataException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
-
     [HttpPut("{id}")]
-    public async Task<IActionResult> Put(int id, [FromBody] AuthorDto authorDto)
+    public async Task<IActionResult> UpdateAuthor(int id, [FromBody] AuthorDto authorDto)
     {
-        var author = new Author
+        try
         {
-            Id = id,
-            FirstName = authorDto.FirstName,
-            LastName = authorDto.LastName
-        };
-
-        if (id != author.Id)
-        {
-            return BadRequest();
+            var author = await _authorService.UpdateAuthorAsync(id, authorDto.FirstName, authorDto.LastName);
+            return Ok(author);
         }
-        await _authorRepository.UpdateAuthorAsync(id, author);
-        return NoContent();
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (InvalidBookDataException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> DeleteAuthor(int id)
     {
-        await _authorRepository.DeleteAuthorAsync(id);
-        return NoContent();
+        try
+        {
+            await _authorService.DeleteAuthorAsync(id);
+            return NoContent();
+        }
+        catch (AuthorNotFoundException ex)
+        {
+            return NotFound(ex.Message);
+        }
+        catch (AuthorHasBooksException ex)
+        {
+            return Conflict(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Internal server error: {ex.Message}");
+        }
     }
 }

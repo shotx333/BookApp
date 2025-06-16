@@ -1,5 +1,3 @@
-﻿
-
 namespace DataAccessLayer.Models.DTO
 {
     public class BookDto
